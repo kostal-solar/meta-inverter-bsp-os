@@ -1,0 +1,25 @@
+From 8aa9a93edc14fa7d8ab8b259388e765451b24a95 Mon Sep 17 00:00:00 2001
+From: Henry Hermanns <h.hermanns@kostal.com>
+Date: Thu, 14 Sep 2023 11:06:40 +0200
+Subject: [PATCH] Reducing i2c bus speed to 10kHz
+
+---
+ arch/arm/boot/dts/imx6-kie-inverter.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/imx6-kie-inverter.dtsi b/arch/arm/boot/dts/imx6-kie-inverter.dtsi
+index 6def2a129c56..14320b2c6dfd 100644
+--- a/arch/arm/boot/dts/imx6-kie-inverter.dtsi
++++ b/arch/arm/boot/dts/imx6-kie-inverter.dtsi
+@@ -191,7 +191,7 @@
+ };
+ 
+ &i2c1 {
+-	clock-frequency = <100000>;
++	clock-frequency = <10000>;
+ 	pinctrl-names = "default", "gpio";
+ 	pinctrl-0 = <&pinctrl_i2c1>;
+ 	status = "okay";
+-- 
+2.17.1
+

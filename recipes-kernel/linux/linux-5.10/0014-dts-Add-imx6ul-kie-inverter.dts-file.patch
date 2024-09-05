@@ -1,0 +1,50 @@
+From f3f05d92198def7c514b703a22df0f640689e1b0 Mon Sep 17 00:00:00 2001
+From: Lukasz Majewski <lukma@denx.de>
+Date: Tue, 1 Aug 2023 14:47:19 +0200
+Subject: [PATCH 14/15] dts: Add imx6ul-kie-inverter.dts file
+
+Signed-off-by: Lukasz Majewski <lukma@denx.de>
+---
+ arch/arm/boot/dts/Makefile                |  1 +
+ arch/arm/boot/dts/imx6ul-kie-inverter.dts | 17 +++++++++++++++++
+ 2 files changed, 18 insertions(+)
+ create mode 100644 arch/arm/boot/dts/imx6ul-kie-inverter.dts
+
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index b4f159a07fe6..fce61df7996c 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -616,6 +616,7 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
+ 	imx6ul-geam.dtb \
+ 	imx6ul-isiot-emmc.dtb \
+ 	imx6ul-isiot-nand.dtb \
++	imx6ul-kie-inverter.dtb \
+ 	imx6ul-kontron-n6310-s.dtb \
+ 	imx6ul-kontron-n6310-s-43.dtb \
+ 	imx6ul-liteboard.dtb \
+diff --git a/arch/arm/boot/dts/imx6ul-kie-inverter.dts b/arch/arm/boot/dts/imx6ul-kie-inverter.dts
+new file mode 100644
+index 000000000000..33b07552eb99
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6ul-kie-inverter.dts
+@@ -0,0 +1,17 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2023 DENX Software Engineering GmbH
++ * Author: Lukasz Majewski <lukma@denx.de>
++ */
++/dts-v1/;
++
++#include "imx6ul.dtsi"
++#include "imx6-kie-inverter.dtsi"
++/ {
++	model = "Kostal KIE imx6 Ultra Inverter";
++	compatible = "kostal,imx6ul-inverter", "fsl,imx6ul";
++};
++
++&crypto {
++	status = "okay";
++};
+-- 
+2.37.2
+

@@ -1,0 +1,34 @@
+From d89a6458191fff373cbac510ce35f3939ff7a8b3 Mon Sep 17 00:00:00 2001
+From: Lukasz Majewski <lukma@denx.de>
+Date: Fri, 28 May 2021 16:41:47 +0200
+Subject: [PATCH 11/15] dts: clk: enet: Do not enable 'enet_clk_ref' and
+ 'enet_out' clocks
+
+Those clocks are not necessary as the enet2 reference clock (50MHz)
+is provided from the mv88e6020 switch.
+
+Signed-off-by: Lukasz Majewski <lukma@denx.de>
+---
+ arch/arm/boot/dts/imx6ull-kie-inverter.dts | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/arch/arm/boot/dts/imx6ull-kie-inverter.dts b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+index a87ba1ca07f9..b766accb5d1c 100644
+--- a/arch/arm/boot/dts/imx6ull-kie-inverter.dts
++++ b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+@@ -163,6 +163,12 @@ &fec2 {
+ 	phy-reset-duration = <10>;
+ 	phy-reset-post-delay = <20>;
+ 	phy-supply = <&reg_3v3>;
++
++	clocks = <&clks IMX6UL_CLK_ENET>,
++		 <&clks IMX6UL_CLK_ENET_AHB>,
++		 <&clks IMX6UL_CLK_ENET_PTP>;
++	clock-names = "ipg", "ahb", "ptp";
++
+ 	status = "okay";
+ 
+ 	fixed-link {
+-- 
+2.37.2
+

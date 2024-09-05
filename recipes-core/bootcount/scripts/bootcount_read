@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+#! /bin/sh
+
+set -e
+
+# To "store" bootcount number, we use SRC_GPR2 register
+# IMX6ULLRM.pdf Chapter: 51.7.7
+IMX6ULL_SRC_GPR2=0x020D8024
+
+BOOTCOUNT_REG=${IMX6ULL_SRC_GPR2}
+
+# Read the bootcount
+val=$(busybox devmem ${BOOTCOUNT_REG} w)
+
+# Check for "B001" prefix
+prefix=$(echo ${val} | cut -c 3-6)
+
+[ "${prefix}" != "B001" ] && exit 1
+
+# Get the value
+value=$(echo ${val} | cut -c 7-10)
+
+echo $((0x${value}))
+
+exit 0

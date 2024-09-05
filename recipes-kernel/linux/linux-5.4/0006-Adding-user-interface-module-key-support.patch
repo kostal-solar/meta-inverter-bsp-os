@@ -1,0 +1,83 @@
+From 5d5300d4bf99f282fbbc12bf2e4d57dc1ffabb74 Mon Sep 17 00:00:00 2001
+From: Mario Arand <m.arand@external.kostal.com>
+Date: Fri, 28 May 2021 14:44:29 +0200
+Subject: [PATCH 3550/3550] Adding user interface module key support
+
+---
+ .../boot/dts/imx6ull-kie-inverter-keys.dtsi   | 50 +++++++++++++++++++
+ arch/arm/boot/dts/imx6ull-kie-inverter.dts    |  2 +-
+ 2 files changed, 51 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/boot/dts/imx6ull-kie-inverter-keys.dtsi
+
+diff --git a/arch/arm/boot/dts/imx6ull-kie-inverter-keys.dtsi b/arch/arm/boot/dts/imx6ull-kie-inverter-keys.dtsi
+new file mode 100644
+index 000000000000..f4c94120a56e
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6ull-kie-inverter-keys.dtsi
+@@ -0,0 +1,50 @@
++/*
++ * Copyright (C) 2016-2017 KOSTAL Industrie Elektrik GmbH
++ */
++
++#include "dt-bindings/input/input.h"
++
++/ {
++	gpio_keys: gpio_keys {
++		compatible = "gpio-keys";
++		#address-cells = <1>;
++		#size-cells = <0>;
++		autorepeat;
++		key_enter {
++			label = "KEY_ENTER";
++			linux,code = <KEY_ENTER>;
++			gpios = <&pca8574 1 GPIO_ACTIVE_LOW>;
++			gpio-key,wakeup;
++		};
++		key_esc {
++			label = "KEY_ESC";
++			linux,code = <KEY_ESC>;
++			gpios = <&pca8574 0 GPIO_ACTIVE_LOW>;
++			gpio-key,wakeup;
++		};
++		key_up {
++			label = "KEY_UP";
++			linux,code = <KEY_UP>;
++			gpios = <&pca8574 4 GPIO_ACTIVE_LOW>;
++			gpio-key,wakeup;
++		};
++		key_down {
++			label = "KEY_DOWN";
++			linux,code = <KEY_DOWN>;
++			gpios = <&pca8574 3 GPIO_ACTIVE_LOW>;
++			gpio-key,wakeup;
++		};
++		key_left {
++			label = "KEY_LEFT";
++			linux,code = <KEY_LEFT>;
++			gpios = <&pca8574 5 GPIO_ACTIVE_LOW>;
++			gpio-key,wakeup;
++		};
++		key_right {
++			label = "KEY_RIGHT";
++			linux,code = <KEY_RIGHT>;
++			gpios = <&pca8574 2 GPIO_ACTIVE_LOW>;
++			gpio-key,wakeup;
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/imx6ull-kie-inverter.dts b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+index 7c0deda6c6e3..8c10506e509b 100644
+--- a/arch/arm/boot/dts/imx6ull-kie-inverter.dts
++++ b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+@@ -8,7 +8,7 @@
+ #include "imx6ull.dtsi"
+ #include "imx6ull-kie-inverter-display.dtsi"
+ #include "imx6ull-kie-inverter-leds.dtsi"
+-
++#include "imx6ull-kie-inverter-keys.dtsi"
+ / {
+ 	model = "Kostal KIE imx6 Ultra Lite Inverter";
+ 	compatible = "kostal,imx6ull-inverter", "fsl,imx6ull";
+-- 
+2.31.1
+

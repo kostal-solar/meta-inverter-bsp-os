@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+#! /bin/sh
+
+mac_idx=${1}
+[ -z ${mac_idx} ] && { echo "Please specify mac index [01] - e.g. ${0} 0"; exit 1; }
+[ ${mac_idx} != "0" -a ${mac_idx} != "1" ] && { echo "Only mac [01] supported!"; exit 1; }   
+
+ocotp_patch=$(find /sys/bus/ -name "imx-ocotp0")
+[ -z ${ocotp_patch} ] && { echo "No FUSE support!"; exit 1; }
+ocotp_file=${ocotp_patch}/nvmem
+
+MAC0_offset=34
+ofile=$(mktemp /tmp/macf-XXXXXX)
+dd if=${ocotp_file} of=${ofile} bs=4 count=3 skip=${MAC0_offset} 2>/dev/null
+
+mac0=$(hexdump -e '12 1 "%02x "' ${ofile} | cut -f1-6 -d' ')
+mac1=$(hexdump -e '12 1 "%02x "' ${ofile} | cut -f7-12 -d' ')
+
+[ ${mac_idx} == 0 ] && mac_addr=${mac0}
+[ ${mac_idx} == 1 ] && mac_addr=${mac1}
+
+echo "${mac_addr}" | awk '{split($0, mac, " "); print mac[6]":"mac[5]":"mac[4]":"mac[3]":"mac[2]":"mac[1]}'
+rm ${ofile}
+
+exit 0

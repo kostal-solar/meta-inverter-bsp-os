@@ -1,0 +1,37 @@
+From 25764b5ad3b0b06be380384dd9ad2513fb6629db Mon Sep 17 00:00:00 2001
+From: Lukasz Majewski <lukma@denx.de>
+Date: Wed, 10 Mar 2021 15:21:52 +0100
+Subject: [PATCH 5/5] dts: Provide DTS properties to support interrupts from
+ mv88e6020
+
+Signed-off-by: Lukasz Majewski <lukma@denx.de>
+---
+ arch/arm/boot/dts/imx6ull-kie-inverter.dts | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/arm/boot/dts/imx6ull-kie-inverter.dts b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+index 19f212b12a49..7ac277b39e9e 100644
+--- a/arch/arm/boot/dts/imx6ull-kie-inverter.dts
++++ b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+@@ -168,6 +168,10 @@
+ 		switch@10 {
+ 			compatible = "marvell,mv88e6250";
+ 			reg = <0x10>;
++			interrupt-parent = <&gpio3>;
++			interrupts = <23 IRQ_TYPE_LEVEL_LOW>;
++			interrupt-controller;
++			#interrupt-cells = <2>;
+ 
+ 			ports {
+ 				#address-cells = <1>;
+@@ -271,6 +275,7 @@
+ 			MX6UL_PAD_ENET2_TX_DATA1__ENET2_TDATA01	0x1b010
+ 			MX6UL_PAD_ENET2_TX_CLK__ENET2_REF_CLK2	0x4001b031
+ 			MX6UL_PAD_LCD_DATA17__GPIO3_IO22        0x80000000
++			MX6UL_PAD_LCD_DATA18__GPIO3_IO23        0x17059
+ 		>;
+ 	};
+ 
+-- 
+2.20.1
+

@@ -1,0 +1,98 @@
+From 3d3b8ea98bec9cae56f9c28eb46029fb96884044 Mon Sep 17 00:00:00 2001
+From: Lukasz Majewski <lukma@denx.de>
+Date: Tue, 19 Oct 2021 16:37:13 +0200
+Subject: [PATCH] dts: usdhc2: Provide proper pin configuration to support
+ HS200 mode
+
+Although the pins were configured to support HS200 mode for the eMMC
+memory on inverter board, the output of debug data was wrong.
+
+After this change - the HS200 mode is properly supported
+root@mx6ul-kie-inverter:~# cat /sys/kernel/debug/mmc1/ios
+clock:          198000000 Hz
+actual clock:   99000000 Hz
+vdd:            21 (3.3 ~ 3.4 V)
+bus mode:       2 (push-pull)
+chip select:    0 (don't care)
+power mode:     2 (on)
+bus width:      3 (8 bits)
+timing spec:    9 (mmc HS200)
+signal voltage: 1 (1.80 V)
+driver type:    0 (driver type B)
+
+Signed-off-by: Lukasz Majewski <lukma@denx.de>
+---
+ arch/arm/boot/dts/imx6ull-kie-inverter.dts | 42 +++++++++++++++++++---
+ 1 file changed, 38 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/boot/dts/imx6ull-kie-inverter.dts b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+index 4a4490eef5d1..3d037273b40b 100644
+--- a/arch/arm/boot/dts/imx6ull-kie-inverter.dts
++++ b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+@@ -284,8 +284,10 @@
+ &usdhc2 {
+ 	u-boot,dm-spl;
+ 	u-boot,dm-pre-reloc;
+-	pinctrl-names = "default";
++	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+ 	pinctrl-0 = <&pinctrl_usdhc2>;
++	pinctrl-1 = <&pinctrl_usdhc2_100mhz>;
++	pinctrl-2 = <&pinctrl_usdhc2_200mhz>;
+ 	bus-width = <8>;
+ 	non-removable;
+ 	keep-power-in-suspend;
+@@ -394,8 +396,40 @@
+ 
+ 	pinctrl_usdhc2: usdhc2grp {
+ 		fsl,pins = <
+-			MX6UL_PAD_NAND_WE_B__USDHC2_CMD 	0x170f9
+-			MX6UL_PAD_NAND_RE_B__USDHC2_CLK   	0x100f9
++			MX6UL_PAD_NAND_WE_B__USDHC2_CMD		0x17059
++			MX6UL_PAD_NAND_RE_B__USDHC2_CLK		0x10059
++			MX6UL_PAD_NAND_DATA00__USDHC2_DATA0	0x17059
++			MX6UL_PAD_NAND_DATA01__USDHC2_DATA1	0x17059
++			MX6UL_PAD_NAND_DATA02__USDHC2_DATA2	0x17059
++			MX6UL_PAD_NAND_DATA03__USDHC2_DATA3	0x17059
++			MX6UL_PAD_NAND_DATA04__USDHC2_DATA4	0x17059
++			MX6UL_PAD_NAND_DATA05__USDHC2_DATA5	0x17059
++			MX6UL_PAD_NAND_DATA06__USDHC2_DATA6	0x17059
++			MX6UL_PAD_NAND_DATA07__USDHC2_DATA7	0x17059
++			MX6UL_PAD_NAND_ALE__USDHC2_RESET_B	0x17059
++		>;
++	};
++
++	pinctrl_usdhc2_100mhz: usdhc2grp100mhz {
++		fsl,pins = <
++			MX6UL_PAD_NAND_WE_B__USDHC2_CMD		0x170b9
++			MX6UL_PAD_NAND_RE_B__USDHC2_CLK		0x100b9
++			MX6UL_PAD_NAND_DATA00__USDHC2_DATA0	0x170b9
++			MX6UL_PAD_NAND_DATA01__USDHC2_DATA1	0x170b9
++			MX6UL_PAD_NAND_DATA02__USDHC2_DATA2	0x170b9
++			MX6UL_PAD_NAND_DATA03__USDHC2_DATA3	0x170b9
++			MX6UL_PAD_NAND_DATA04__USDHC2_DATA4	0x170b9
++			MX6UL_PAD_NAND_DATA05__USDHC2_DATA5	0x170b9
++			MX6UL_PAD_NAND_DATA06__USDHC2_DATA6	0x170b9
++			MX6UL_PAD_NAND_DATA07__USDHC2_DATA7	0x170b9
++			MX6UL_PAD_NAND_ALE__USDHC2_RESET_B	0x170b9
++		>;
++	};
++
++	pinctrl_usdhc2_200mhz: usdhc2grp200mhz {
++		fsl,pins = <
++			MX6UL_PAD_NAND_WE_B__USDHC2_CMD		0x170f9
++			MX6UL_PAD_NAND_RE_B__USDHC2_CLK		0x100f9
+ 			MX6UL_PAD_NAND_DATA00__USDHC2_DATA0	0x170f9
+ 			MX6UL_PAD_NAND_DATA01__USDHC2_DATA1	0x170f9
+ 			MX6UL_PAD_NAND_DATA02__USDHC2_DATA2	0x170f9
+@@ -404,7 +438,7 @@
+ 			MX6UL_PAD_NAND_DATA05__USDHC2_DATA5	0x170f9
+ 			MX6UL_PAD_NAND_DATA06__USDHC2_DATA6	0x170f9
+ 			MX6UL_PAD_NAND_DATA07__USDHC2_DATA7	0x170f9
+-			MX6UL_PAD_NAND_ALE__USDHC2_RESET_B 	0x170f9
++			MX6UL_PAD_NAND_ALE__USDHC2_RESET_B	0x170f9
+ 		>;
+ 	};
+ };
+-- 
+2.20.1
+

@@ -1,0 +1,30 @@
+CURRENT_BLK_PARTITION=`mount | grep "on / type" | cut -d':' -f 2 | cut -d' ' -f 1 | awk -F '/' '{print $3;}' | sed -e 's/mmcblk1p//g'`
+echo "Determined Block partition is ${CURRENT_BLK_PARTITION}"
+
+CURRENT_COPYID=$CURRENT_BLK_PARTITION
+echo "Current copy Id is $CURRENT_COPYID"
+
+case $CURRENT_COPYID in
+  "5")
+	  COPYID="copy2"
+	  ;;
+  "6")
+	  COPYID="copy1"
+	  ;;
+  *)
+	  COPYID="rescue"
+	  ;;
+  esac
+
+echo "Copy id to use is $COPYID"
+selection="-e stable,${COPYID}"
+if [ -f /data/etc/swupdate.cfg ];then
+	CFGFILE=/data/etc/swupdate.cfg
+else
+	CFGFILE=/etc/swupdate.cfg
+fi
+SWUPDATE_ARGS="-v -H @@MACHINE@@:1.0 ${selection} -f ${CFGFILE}"
+# Add AES key
+#SWUPDATE_ARGS+="-K /etc/crts/swu_aes256_key.bin" 
+# Add Key for signed image
+#SWUPDATE_ARGS+="-k /etc/crts/swu_rsa_pub_key.pem"

@@ -1,0 +1,59 @@
+From 431a43935aaae69df8d28cb0adc6d191f9b06f35 Mon Sep 17 00:00:00 2001
+From: Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+Date: Mon, 30 Mar 2020 15:53:43 +0200
+Subject: [PATCH 2/4] net: dsa: mv88e6xxx: account for PHY base address offset
+ in dual chip mode
+
+In dual chip mode (6250 family), not only global and port registers are
+shifted by sw_addr, but also the PHY addresses. Account for this in the
+IRQ mapping.
+
+Signed-off-by: Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+---
+ drivers/net/dsa/mv88e6xxx/chip.h    | 1 +
+ drivers/net/dsa/mv88e6xxx/global2.c | 2 +-
+ drivers/net/dsa/mv88e6xxx/smi.c     | 4 ++++
+ 3 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/net/dsa/mv88e6xxx/chip.h b/drivers/net/dsa/mv88e6xxx/chip.h
+index e9b1a1ac9a8e..27be75b429d1 100644
+--- a/drivers/net/dsa/mv88e6xxx/chip.h
++++ b/drivers/net/dsa/mv88e6xxx/chip.h
+@@ -248,6 +248,7 @@ struct mv88e6xxx_chip {
+ 	const struct mv88e6xxx_bus_ops *smi_ops;
+ 	struct mii_bus *bus;
+ 	int sw_addr;
++	unsigned int phy_base_addr;
+ 
+ 	/* Handles automatic disabling and re-enabling of the PHY
+ 	 * polling unit.
+diff --git a/drivers/net/dsa/mv88e6xxx/global2.c b/drivers/net/dsa/mv88e6xxx/global2.c
+index bdbb72fc20ed..35b8c63c5f4a 100644
+--- a/drivers/net/dsa/mv88e6xxx/global2.c
++++ b/drivers/net/dsa/mv88e6xxx/global2.c
+@@ -1131,7 +1131,7 @@ int mv88e6xxx_g2_irq_mdio_setup(struct mv88e6xxx_chip *chip,
+ 			err = irq;
+ 			goto out;
+ 		}
+-		bus->irq[chip->info->phy_base_addr + phy] = irq;
++		bus->irq[chip->phy_base_addr + phy] = irq;
+ 	}
+ 	return 0;
+ out:
+diff --git a/drivers/net/dsa/mv88e6xxx/smi.c b/drivers/net/dsa/mv88e6xxx/smi.c
+index 282fe08db050..a62d7b8702d5 100644
+--- a/drivers/net/dsa/mv88e6xxx/smi.c
++++ b/drivers/net/dsa/mv88e6xxx/smi.c
+@@ -175,5 +175,9 @@ int mv88e6xxx_smi_init(struct mv88e6xxx_chip *chip,
+ 	chip->bus = bus;
+ 	chip->sw_addr = sw_addr;
+ 
++	chip->phy_base_addr = chip->info->phy_base_addr;
++	if (chip->info->dual_chip)
++		chip->phy_base_addr += sw_addr;
++
+ 	return 0;
+ }
+-- 
+2.20.1
+

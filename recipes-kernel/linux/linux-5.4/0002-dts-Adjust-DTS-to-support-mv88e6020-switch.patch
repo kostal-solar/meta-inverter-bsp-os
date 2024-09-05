@@ -1,0 +1,99 @@
+From 5e9332e5a3861966e6b73fdceb83b925c45f1536 Mon Sep 17 00:00:00 2001
+From: Lukasz Majewski <lukma@denx.de>
+Date: Wed, 10 Mar 2021 11:46:34 +0100
+Subject: [PATCH 2/5] dts: Adjust DTS to support mv88e6020 switch
+
+It is important to note that both fec2 and port@6 (connected to cpu)
+need to have 'fixed-link' node.
+It is caused by the mv88e6020 connection to CPU - it acts as a PHY.
+
+Moreover, pinmux configuration for GPIO3_IO1{89} has been removed as
+those are no longer used.
+
+One shall also pay attention of the switch addres on MDIO bus -
+0x10. It reflects the state of ADDR4 bootstrap pin (=1).
+
+Signed-off-by: Lukasz Majewski <lukma@denx.de>
+---
+ arch/arm/boot/dts/imx6ull-kie-inverter.dts | 55 ++++++++++++++--------
+ 1 file changed, 36 insertions(+), 19 deletions(-)
+
+diff --git a/arch/arm/boot/dts/imx6ull-kie-inverter.dts b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+index d01279ba329a..60e9e7e6b764 100644
+--- a/arch/arm/boot/dts/imx6ull-kie-inverter.dts
++++ b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+@@ -157,26 +157,45 @@
+ 	phy-supply = <&reg_3v3>;
+ 	status = "okay";
+ 
+-	mdio: mdio {
++	fixed-link {
++		speed = <100>;
++		full-duplex;
++	};
++
++	mdio {
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+ 
+-		ethphy0: ethernet-phy@0 {
+-			reg = <0>;
+-			micrel,led-mode = <1>;
+-			clocks = <&clks IMX6UL_CLK_ENET_REF>;
+-			clock-names = "rmii-ref";
+-			//interrupt-parent = <&gpio3>;
+-			//interrupts = <23 IRQ_TYPE_LEVEL_LOW>;
+-		};
+-
+-		ethphy1: ethernet-phy@3 {
+-			reg = <3>;
+-			micrel,led-mode = <1>;
+-			clocks = <&clks IMX6UL_CLK_ENET2_REF>;
+-			clock-names = "rmii-ref";
+-			//interrupt-parent = <&gpio3>;
+-			//interrupts = <19 IRQ_TYPE_LEVEL_LOW>;
++		switch@10 {
++			compatible = "marvell,mv88e6250";
++			reg = <0x10>;
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++
++				port@0 {
++					reg = <0>;
++					label = "lan1";
++				};
++
++				port@1 {
++					reg = <1>;
++					label = "lan2";
++				};
++
++				port@6 {
++					reg = <6>;
++					label = "cpu";
++					phy-mode = "rmii";
++					ethernet = <&fec2>;
++
++					fixed-link {
++						   speed = <100>;
++						   full-duplex;
++					};
++				};
++			};
+ 		};
+ 	};
+ };
+@@ -252,8 +271,6 @@
+ 			MX6UL_PAD_ENET2_TX_DATA0__ENET2_TDATA00	0x1b010
+ 			MX6UL_PAD_ENET2_TX_DATA1__ENET2_TDATA01	0x1b010
+ 			MX6UL_PAD_ENET2_TX_CLK__ENET2_REF_CLK2	0x4001b031
+-			MX6UL_PAD_LCD_DATA13__GPIO3_IO18	0x17059
+-			MX6UL_PAD_LCD_DATA14__GPIO3_IO19	0x17059
+ 		>;
+ 	};
+ 
+-- 
+2.20.1
+

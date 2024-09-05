@@ -1,0 +1,46 @@
+From 7a375472bce6b7bb65d9d87decbce0942aee04b5 Mon Sep 17 00:00:00 2001
+From: Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+Date: Mon, 30 Mar 2020 15:53:44 +0200
+Subject: [PATCH 3/4] net: dsa: mv88e6xxx: implement get_phy_address
+
+Avoid the need to specify a PHY for each physical port in the device tree
+when phy_base_addr is not 0 (6250 and 6341 families).
+
+This change should be backwards-compatible with existing device trees,
+as it only adds sensible defaults where explicit definitions were
+required before.
+
+Signed-off-by: Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+---
+ drivers/net/dsa/mv88e6xxx/chip.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/net/dsa/mv88e6xxx/chip.c b/drivers/net/dsa/mv88e6xxx/chip.c
+index 6787d560e9e3..e8b1db7ea1b0 100644
+--- a/drivers/net/dsa/mv88e6xxx/chip.c
++++ b/drivers/net/dsa/mv88e6xxx/chip.c
+@@ -4878,6 +4878,13 @@ static enum dsa_tag_protocol mv88e6xxx_get_tag_protocol(struct dsa_switch *ds,
+ 	return chip->info->tag_protocol;
+ }
+ 
++static int mv88e6xxx_get_phy_address(struct dsa_switch *ds, int port)
++{
++	struct mv88e6xxx_chip *chip = ds->priv;
++
++	return chip->phy_base_addr + port;
++}
++
+ static int mv88e6xxx_port_mdb_prepare(struct dsa_switch *ds, int port,
+ 				      const struct switchdev_obj_port_mdb *mdb)
+ {
+@@ -4933,6 +4940,7 @@ static int mv88e6xxx_port_egress_floods(struct dsa_switch *ds, int port,
+ static const struct dsa_switch_ops mv88e6xxx_switch_ops = {
+ 	.get_tag_protocol	= mv88e6xxx_get_tag_protocol,
+ 	.setup			= mv88e6xxx_setup,
++	.get_phy_address	= mv88e6xxx_get_phy_address,
+ 	.phylink_validate	= mv88e6xxx_validate,
+ 	.phylink_mac_link_state	= mv88e6xxx_link_state,
+ 	.phylink_mac_config	= mv88e6xxx_mac_config,
+-- 
+2.20.1
+

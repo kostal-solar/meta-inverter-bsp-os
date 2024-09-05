@@ -1,0 +1,57 @@
+From 605e252cb853c647518c470c3da9ac32cc34628c Mon Sep 17 00:00:00 2001
+From: buerg006 <a.buergel@kostal.com>
+Date: Fri, 12 Mar 2021 22:10:18 +0100
+Subject: [PATCH] initial import
+
+---
+ .../boot/dts/imx6ull-kie-inverter-leds.dtsi   | 38 +++++++++++++++++++
+ 1 file changed, 38 insertions(+)
+ create mode 100644 arch/arm/boot/dts/imx6ull-kie-inverter-leds.dtsi
+
+diff --git a/arch/arm/boot/dts/imx6ull-kie-inverter-leds.dtsi b/arch/arm/boot/dts/imx6ull-kie-inverter-leds.dtsi
+new file mode 100644
+index 000000000000..db4bce376018
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6ull-kie-inverter-leds.dtsi
+@@ -0,0 +1,38 @@
++/**
++ *	display device tree include-file for Kostal i.MX6ULL based solar-inverter I/O-board
++ *
++ *	@author a.buergel@kostal.com
++ *
++ *	$Id: $
++ *	$HeadURL: $
++ *	$Revision: $
++ */
++
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/leds/common.h>
++
++/{
++	leds {
++		compatible = "gpio-leds";
++
++		led@debug {
++			gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;
++			color = <LED_COLOR_ID_RED>;
++			label = "red:dbg";
++			default-state = "off";
++		};
++
++		led@run {
++			label = "green:run";
++			gpios = <&pca8574 6 GPIO_ACTIVE_HIGH>;
++			default-state = "off";
++		};
++
++		led@error {
++			label = "red:error";
++			gpios = <&pca8574 7 GPIO_ACTIVE_HIGH>;
++			default-state = "off";
++		};
++	};
++};
+-- 
+2.25.1
+

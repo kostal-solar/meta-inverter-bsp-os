@@ -1,0 +1,10 @@
+[Unit]
+Description=Service to set bridge MAC address
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "/bin/echo 'br0 available, setting MAC ' `/usr/bin/ocotp_get_mac 0`"
+ExecStart=/bin/bash -c "/sbin/ip link set br0 address `/usr/bin/ocotp_get_mac 0`"
+
+[Install]
+WantedBy=sys-subsystem-net-devices-br0.device

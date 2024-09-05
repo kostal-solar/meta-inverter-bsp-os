@@ -1,0 +1,24 @@
+From 8e11b4f4acec72034762c935fc8752c1326fe0a9 Mon Sep 17 00:00:00 2001
+From: buerg006 <a.buergel@kostal.com>
+Date: Thu, 11 Feb 2021 18:28:26 +0100
+Subject: [PATCH 2/2] now includes imx6ull-ki-inverter-leds.dtsi
+
+---
+ arch/arm/boot/dts/imx6ull-kie-inverter.dts | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/boot/dts/imx6ull-kie-inverter.dts b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+index f17669c86caa..4cf661ed5e3a 100644
+--- a/arch/arm/boot/dts/imx6ull-kie-inverter.dts
++++ b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+@@ -7,6 +7,7 @@
+ 
+ #include "imx6ull.dtsi"
+ #include "imx6ull-kie-inverter-display.dtsi"
++#include "imx6ull-kie-inverter-leds.dtsi"
+ 
+ / {
+ 	model = "Kostal KIE imx6 Ultra Lite Inverter";
+-- 
+2.25.1
+

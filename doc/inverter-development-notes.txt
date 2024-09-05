@@ -1,0 +1,84 @@
+Inverter (imx6ull / imx6ul):
+############################
+
+RUN FACTORY IMAGE:
+------------------
+setenv addstaticip 'setenv bootargs ${bootargs} ip=10.0.0.55::10.0.0.81:255.255.255.0:scb-factory:lan1'
+
+
+(More debug):
+setenv bootinfo "boot_type=factory enterinitramfs debugshell" && setenv swupdate_usb_name factory-image-fit.itb.signed
+
+(Normal - FACTORY - operation)
+setenv bootinfo "boot_type=factory enterinitramfs" && setenv swupdate_usb_name factory-image-fit.itb.signed
+run swupdate_tftp
+
+
+RUN RESCUE IMAGE:
+-----------------
+
+setenv bootinfo "boot_type=rescue" && setenv swupdate_usb_name rescue-initramfs.itb.signed
+run swupdate_tftp
+
+Erase the keyblob on imx6ul{l} device:
+--------------------------------------
+
+echo 0 > /sys/block/mmcblk1boot0/force_ro
+dd of=/dev/mmcblk1boot0 if=/dev/zero bs=512 seek=8191 count=1
+echo 1 > /sys/block/mmcblk1boot0/force_ro
+
+
+U-boot check the keyblob:
+mmc dev 0 1
+mmc read ${loadaddr} 0x1fff 1
+md.l ${loadaddr}
+
+U-boot erase the keyblob:
+mmc dev 0 1
+mw.l ${loadaddr} 0 512
+md.l ${loadaddr}
+mmc write ${loadaddr} 0x1fff 1
+
+Backlight testing:
+------------------
+
+cd /sys/class/backlight/backlight
+
+disable backlight: echo 1 > bl_power
+enable  backlight: echo 0 > bl_power
+
+dim	backlight: echo 4 > brightness
+
+
+Wifi testing:
+-------------
+
+Please prepare proper wpa_supplicant.conf file to get credentials
+to access your Wi-Fi network (to /tmp).
+
+wpa_supplicant -Dnl80211 -B -c /tmp/wpa_supplicant.conf -i mlan0
+ifconfig mlan0 up
+udhcpc -i mlan0
+
+
+Switch (L2) testing:
+--------------------
+
+ifconfig lan1 up
+ifconfig lan2 up
+udhcpc -i br0
+
+Checking the eMMC boot partitions status:
+-----------------------------------------
+
+/ # mmc writeprotect boot get /dev/mmcblk1boot0
+
+Example output (shall be unclocked after reboot - but this not
+always work!!!):
+
+Boot write protection status registers [BOOT_WP_STATUS]: 0x01
+Boot Area Write protection [BOOT_WP]: 0x81
+ Power ro locking: possible
+ Permanent ro locking: possible
+ partition 0 ro lock status: locked until next power on
+ partition 1 ro lock status: not locked

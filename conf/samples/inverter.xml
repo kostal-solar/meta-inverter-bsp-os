@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<manifest>
+  <remote fetch="git://git.yoctoproject.org/" name="poky"/>
+  <remote fetch="ssh://git@gitlab.denx.de/kostal/" name="kostal"/>
+  <remote fetch="https://github.com/sbabic/" name="meta-swupdate"/>
+  <remote fetch="http://git.openembedded.org/" name="meta-openembedded"/>
+
+  <project remote="poky" revision="master" name="poky" path="inverter"/>
+  <project remote="kostal" revision="master" name="meta-inverter-bsp" path="inverter/meta-inverter-bsp"/>
+  <project remote="kostal" revision="master" name="meta-secure-imx" path="inverter/meta-secure-imx"/>
+  <project remote="meta-swupdate" revision="master" name="meta-swupdate" path="inverter/meta-swupdate"/>
+  <project remote="poky" revision="master" name="meta-security" path="inverter/meta-security"/>
+  <project remote="meta-openembedded" revision="master" name="meta-openembedded" path="inverter/meta-openembedded"/>
+</manifest>

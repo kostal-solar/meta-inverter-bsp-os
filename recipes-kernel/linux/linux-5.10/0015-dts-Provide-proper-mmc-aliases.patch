@@ -1,0 +1,34 @@
+From 2807fa3d985a90c015a8bd01acd4a815a20da5d2 Mon Sep 17 00:00:00 2001
+From: Lukasz Majewski <lukma@denx.de>
+Date: Mon, 7 Aug 2023 14:55:28 +0200
+Subject: [PATCH 15/15] dts: Provide proper mmc aliases
+
+After updating Linux kernel to v5.10.188 (from 5.4.24) it turned out that
+the mmc ordering has changed - the MMC has been recognized as mmc0 and
+SDIO was recognizes as mmc2.
+
+To provide backward compatibility with 5.4.24 scripts and setup, the DTS
+aliases has been updated to provide the same mapping.
+
+Signed-off-by: Lukasz Majewski <lukma@denx.de>
+---
+ arch/arm/boot/dts/imx6-kie-inverter.dtsi | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/imx6-kie-inverter.dtsi b/arch/arm/boot/dts/imx6-kie-inverter.dtsi
+index 9c464c0789e9..6def2a129c56 100644
+--- a/arch/arm/boot/dts/imx6-kie-inverter.dtsi
++++ b/arch/arm/boot/dts/imx6-kie-inverter.dtsi
+@@ -10,7 +10,8 @@
+ / {
+ 	aliases {
+ 		u-boot,dm-pre-reloc;
+-		mmc0 = &usdhc2;
++		mmc0 = &usdhc1;
++		mmc1 = &usdhc2;
+ 		usb0 = &usbotg1;
+ 		ethernet0 = &fec2;
+ 	};
+-- 
+2.37.2
+

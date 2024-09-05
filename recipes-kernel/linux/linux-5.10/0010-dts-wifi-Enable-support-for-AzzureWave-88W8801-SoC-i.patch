@@ -1,0 +1,98 @@
+From b7da2cbbb4c92cf456485c6a46c85a1464031f99 Mon Sep 17 00:00:00 2001
+From: Lukasz Majewski <lukma@denx.de>
+Date: Thu, 15 Apr 2021 12:46:55 +0200
+Subject: [PATCH 10/15] dts: wifi: Enable support for AzzureWave (88W8801 SoC)
+ in the DTS for inverter
+
+Signed-off-by: Lukasz Majewski <lukma@denx.de>
+---
+ arch/arm/boot/dts/imx6ull-kie-inverter.dts | 52 ++++++++++++++++++++++
+ 1 file changed, 52 insertions(+)
+
+diff --git a/arch/arm/boot/dts/imx6ull-kie-inverter.dts b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+index d9dbe8e3e3b9..a87ba1ca07f9 100644
+--- a/arch/arm/boot/dts/imx6ull-kie-inverter.dts
++++ b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+@@ -124,6 +124,14 @@ panel_in: endpoint {
+ 	};
+ */
+ 
++	wifi_pwrseq: sdio-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		pinctrl-names = "default";
++		pinctrl-0 = <&sdio_wifi_pwrseq>;
++		reset-gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
++		post-power-on-delay-ms = <2>;
++	};
++
+ 	watchdog: watchdog {
+ 		compatible = "linux,wdt-gpio";
+ 		gpios = <&gpio1 5 GPIO_ACTIVE_HIGH>;
+@@ -249,6 +257,24 @@ &usbotg2 {
+ 	status = "okay";
+ };
+ 
++&usdhc1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_usdhc1>;
++	bus-width = <4>;
++	no-1-8-v;       /* force 3.3V VIO */
++	non-removable;
++	vmmc-supply = <&reg_3v3>;
++	keep-power-in-suspend;
++	mmc-pwrseq = <&wifi_pwrseq>;
++	max-frequency = <25000000>;
++	status = "okay";
++
++	wlan@1 {
++	       compatible = "marvell,sd8897";
++	       reg = <1>;
++	};
++};
++
+ &usdhc2 {
+ 	u-boot,dm-spl;
+ 	u-boot,dm-pre-reloc;
+@@ -305,6 +331,12 @@ MX6UL_PAD_GPIO1_IO08__GPIO1_IO08	0x0b0b0
+ 		>;
+ 	};
+ 
++	sdio_wifi_pwrseq: wifipdngrp {
++		fsl,pins = <
++			/* WL_PDN */
++			MX6UL_PAD_GPIO1_IO01__GPIO1_IO01	0x10b0
++		>;
++	};
+ 
+ 	pinctrl_pwm6: pwm6grp {
+ 		fsl,pins = <
+@@ -334,6 +366,26 @@ MX6UL_PAD_GPIO1_IO04__GPIO1_IO04	0x10b0
+ 		>;
+ 	};
+ 
++	pinctrl_usdhc1: usdhc1grp {
++		fsl,pins = <
++			MX6UL_PAD_SD1_CMD__USDHC1_CMD		0x170f9
++			MX6UL_PAD_SD1_CLK__USDHC1_CLK		0x100f9
++			MX6UL_PAD_SD1_DATA0__USDHC1_DATA0       0x170f9
++			MX6UL_PAD_SD1_DATA1__USDHC1_DATA1       0x170f9
++			MX6UL_PAD_SD1_DATA2__USDHC1_DATA2       0x170f9
++			MX6UL_PAD_SD1_DATA3__USDHC1_DATA3       0x170f9
++
++			/* WL_HOST_WAKE */
++			MX6UL_PAD_GPIO1_IO00__GPIO1_IO00	0x10b0
++
++			/* WL_SD_WAKE */
++			MX6UL_PAD_GPIO1_IO02__GPIO1_IO02	0x10b0
++
++			/* WL_GPIO0 */
++			MX6UL_PAD_LCD_DATA21__GPIO3_IO26	0x10b0
++		>;
++	};
++
+ 	pinctrl_usdhc2: usdhc2grp {
+ 		fsl,pins = <
+ 			MX6UL_PAD_NAND_WE_B__USDHC2_CMD 	0x170f9
+-- 
+2.37.2
+

@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+#! /bin/sh
+
+set -e
+
+# To "store" bootcount number, we use SRC_GPR2 register
+# IMX6ULLRM.pdf Chapter: 51.7.7
+IMX6ULL_SRC_GPR2=0x020D8024
+
+BOOTCOUNT_REG=${IMX6ULL_SRC_GPR2}
+
+# Erase the bootcount -> boot to user space OK
+busybox devmem ${BOOTCOUNT_REG} w 0x0 || exit 1
+
+# Check if really erased
+ret=$(devmem ${BOOTCOUNT_REG} w)
+
+[ "${ret}" != "0x00000000" ] && exit 1
+
+exit 0

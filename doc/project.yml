@@ -1,0 +1,73 @@
+# Every file needs to contain a header, that provides kas with information
+# # about the context of this file.
+header:
+  # The `version` entry in the header describes for which configuration
+  # format version this file was created for. It is used by kas to figure
+  # out if it is compatible with this file. The version is an integer that
+  # is increased on every format change.
+  version: 8
+  # The machine as it is written into the `local.conf` of bitbake.
+machine: "mx6ul-kie-inverter"
+# The distro name as it is written into the `local.conf` of bitbake.
+distro: "kostal"
+repos:
+  # This entry includes the repository where the config file is located
+  # to the bblayers.conf:
+  meta-inverter-bsp:
+    # Add externalally available repository url here:
+    # url: "https://github.com/kostal/meta-inverter-bsp.git"
+    url: "git://git.de.kostal.int:7999/puck/meta-inverter-bsp.git"
+    branch: open-source-base 
+
+  # Here we include a list of layers from the poky repository to the
+  # bblayers.conf:
+  poky:
+    url: "https://git.yoctoproject.org/git/poky"
+    commit: df86cc15d0a39d8d85747f7acc2c887cccfd9fa7
+    layers:
+      meta:
+      meta-poky:
+      meta-yocto-bsp: exclude
+  meta-security:
+    url: "git://git.yoctoproject.org/meta-security"
+    commit: eb631c12be585d18beddbb41f6035772b2cb17d5
+  meta-openembedded:
+    url: "git://git.openembedded.org/meta-openembedded"
+    commit: b8b0b06821d4d4df0cce4f07fa31a8ca1dd38f46
+    layers:
+      meta-oe:
+      meta-filesystems:
+      meta-perl:
+      meta-python:
+      meta-networking:
+  meta-swupdate:
+    url: "https://github.com/sbabic/meta-swupdate.git"
+    commit: 18a15193f968ced4579635534eac688be1fb5f0f
+  
+bblayers_conf_header:
+  standard: |
+    POKY_BBLAYERS_CONF_VERSION = "2"
+    BBPATH = "${TOPDIR}"
+    BBFILES ?= ""
+
+local_conf_header:
+  meta-kostal-bsp: |
+    PATCHRESOLVE = "noop"
+    CONF_VERSION = "1"
+    DL_DIR ?= "/work/yocto_downloads"
+    SSTATE_DIR ?= "/work/sstate-cache-dunfell"
+    PACKAGE_CLASSES ?= "package_ipk"
+    EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
+    USER_CLASSES ?= "buildstats image-mklibs image-prelink"
+    PACKAGECONFIG_append_pn-qemu-native = " sdl"
+    PACKAGECONFIG_append_pn-nativesdk-qemu = " sdl"
+    INHERIT += "image-buildinfo"
+    BB_DISKMON_DIRS = "\
+        STOPTASKS,${TMPDIR},1G,100K \
+        STOPTASKS,${DL_DIR},1G,100K \
+        STOPTASKS,${SSTATE_DIR},1G,100K \
+        STOPTASKS,/tmp,100M,100K \
+        ABORT,${TMPDIR},100M,1K \
+        ABORT,${DL_DIR},100M,1K \
+        ABORT,${SSTATE_DIR},100M,1K \
+        ABORT,/tmp,10M,1K"

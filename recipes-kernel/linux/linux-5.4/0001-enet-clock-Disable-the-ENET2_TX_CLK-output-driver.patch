@@ -1,0 +1,53 @@
+From fd5ff5dc87d5cdab2452122946cebaadd97c5a98 Mon Sep 17 00:00:00 2001
+From: Lukasz Majewski <lukma@denx.de>
+Date: Fri, 28 May 2021 14:54:58 +0200
+Subject: [PATCH] enet: clock: Disable the ENET2_TX_CLK output driver
+
+When the ENET2 reference clock is provided from PHY (or DSA switch as
+in oud case) it is necessary to disable the ENET2_TX_CLK output driver
+to avoid clock distortion connected to this pin.
+
+Without this change, the input 50 MHz reference clock is malformed and
+RX packet rate error is about 5%. Even worse, RTOs are introduced,
+which causes very low performance.
+
+Signed-off-by: Lukasz Majewski <lukma@denx.de>
+---
+ arch/arm/mach-imx/mach-imx6ul.c | 17 ++++++++++++-----
+ 1 file changed, 12 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/mach-imx/mach-imx6ul.c b/arch/arm/mach-imx/mach-imx6ul.c
+index 311f5e4ff723..1c4034a2f20a 100644
+--- a/arch/arm/mach-imx/mach-imx6ul.c
++++ b/arch/arm/mach-imx/mach-imx6ul.c
+@@ -17,15 +17,22 @@
+ 
+ static void __init imx6ul_enet_clk_init(void)
+ {
++	struct device_node *np;
+ 	struct regmap *gpr;
+ 
+ 	gpr = syscon_regmap_lookup_by_compatible("fsl,imx6ul-iomuxc-gpr");
+-	if (!IS_ERR(gpr))
+-		regmap_update_bits(gpr, IOMUXC_GPR1, IMX6UL_GPR1_ENET_CLK_DIR,
+-				   IMX6UL_GPR1_ENET_CLK_OUTPUT);
+-	else
+-		pr_err("failed to find fsl,imx6ul-iomux-gpr regmap\n");
+ 
++	if (!IS_ERR(gpr)) {
++		np = of_find_compatible_node(NULL, NULL, "marvell,mv88e6250");
++		if (!np) {
++			regmap_update_bits(gpr, IOMUXC_GPR1,
++					   IMX6UL_GPR1_ENET_CLK_DIR,
++					   IMX6UL_GPR1_ENET_CLK_OUTPUT);
++			return;
++		}
++		of_node_put(np);
++	} else
++		pr_err("failed to find fsl,imx6ul-iomux-gpr regmap\n");
+ }
+ 
+ static int ksz8081_phy_fixup(struct phy_device *dev)
+-- 
+2.20.1
+

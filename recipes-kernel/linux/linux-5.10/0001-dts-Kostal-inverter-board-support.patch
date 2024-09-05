@@ -1,0 +1,1017 @@
+From e48b6123ef10772dc28713c1f69fe9db9724d39e Mon Sep 17 00:00:00 2001
+From: Parthiban Nallathambi <pn@denx.de>
+Date: Wed, 22 Jan 2020 09:13:15 +0100
+Subject: [PATCH 01/15] dts: Kostal inverter board support
+
+Signed-off-by: Parthiban Nallathambi <pn@denx.de>
+Signed-off-by: Stefano Babic <sbabic@denx.de>
+Signed-off-by: Lukasz Majewski <lukma@denx.de>
+---
+ arch/arm/boot/dts/Makefile                    |   1 +
+ .../dts/imx6ull-kie-inverter-display.dtsi     |  60 +++
+ .../boot/dts/imx6ull-kie-inverter-leds.dtsi   |  38 ++
+ arch/arm/boot/dts/imx6ull-kie-inverter.dts    | 347 +++++++++++++
+ drivers/staging/fbtft/Kconfig                 |   6 +
+ drivers/staging/fbtft/Makefile                |   1 +
+ drivers/staging/fbtft/fb_st75256.c            | 482 ++++++++++++++++++
+ 7 files changed, 935 insertions(+)
+ create mode 100644 arch/arm/boot/dts/imx6ull-kie-inverter-display.dtsi
+ create mode 100644 arch/arm/boot/dts/imx6ull-kie-inverter-leds.dtsi
+ create mode 100644 arch/arm/boot/dts/imx6ull-kie-inverter.dts
+ create mode 100644 drivers/staging/fbtft/fb_st75256.c
+
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index d93f01dddc3f..b4f159a07fe6 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -632,6 +632,7 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
+ 	imx6ull-colibri-wifi-eval-v3.dtb \
+ 	imx6ull-myir-mys-6ulx-eval.dtb \
+ 	imx6ull-opos6uldev.dtb \
++	imx6ull-kie-inverter.dtb \
+ 	imx6ull-phytec-segin-ff-rdk-nand.dtb \
+ 	imx6ull-phytec-segin-ff-rdk-emmc.dtb \
+ 	imx6ull-phytec-segin-lc-rdk-nand.dtb \
+diff --git a/arch/arm/boot/dts/imx6ull-kie-inverter-display.dtsi b/arch/arm/boot/dts/imx6ull-kie-inverter-display.dtsi
+new file mode 100644
+index 000000000000..e420052d67f3
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6ull-kie-inverter-display.dtsi
+@@ -0,0 +1,60 @@
++/** 
++ *	display device tree include-file for Kostal i.MX6ULL based solar-inverter I/O-board
++ * 
++ *	@author a.buergel@kostal.com
++ * 
++ *	$Id: $
++ *	$HeadURL: $
++ *	$Revision: $
++ */
++
++#include "dt-bindings/pwm/pwm.h"
++
++&iomuxc {
++	st75256_pins: pinmux_st75256_pins {                /*!< Function assigned for the core: Cortex-A7[ca7] */
++		fsl,pins = <
++			MX6UL_PAD_LCD_CLK__GPIO3_IO00              0x000010B0
++			MX6UL_PAD_LCD_DATA00__GPIO3_IO05           0x000010B0
++			MX6UL_PAD_LCD_DATA01__GPIO3_IO06           0x000010B0
++			MX6UL_PAD_LCD_DATA02__GPIO3_IO07           0x000010B0
++			MX6UL_PAD_LCD_DATA03__GPIO3_IO08           0x000010B0
++			MX6UL_PAD_LCD_DATA04__GPIO3_IO09           0x000010B0
++			MX6UL_PAD_LCD_DATA05__GPIO3_IO10           0x000010B0
++			MX6UL_PAD_LCD_DATA06__GPIO3_IO11           0x000010B0
++			MX6UL_PAD_LCD_DATA07__GPIO3_IO12           0x000010B0
++			MX6UL_PAD_LCD_ENABLE__GPIO3_IO01           0x000010B0
++			MX6UL_PAD_LCD_HSYNC__GPIO3_IO02            0x000010B0
++			MX6UL_PAD_LCD_VSYNC__GPIO3_IO03            0x000010B0
++			MX6UL_PAD_LCD_RESET__GPIO3_IO04            0x000010B0
++		>;
++	};
++};
++
++
++/{
++    st75256@0 {
++		compatible = "sitronix,st75256";
++		#address-cells = <1>;
++		#size-cells = <0>;
++		reg = <0>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&st75256_pins>;
++		reset-gpios = <&gpio3 3 0>;
++		dc-gpios = <&gpio3 2 0>;
++		wr-gpios = <&gpio3 0 0>;
++		cs-gpios = <&gpio3 4 1>;
++		rd-gpios = <&gpio3 1 0>;
++		db-gpios = <&gpio3 5 0 &gpio3 6 0 &gpio3 7 0 &gpio3 8 0 &gpio3 9 0 &gpio3 10 0 &gpio3 11 0 &gpio3 12 0>;
++		buswidth = <8>;
++		width = <240>;
++		height = <160>;
++		fps = <20>;
++		rotate = <180>;
++		bpp = <24>;
++		debug = <0>;
++		status = "okay";
++	};
++};
++
++/* 0 0 0 1  0 */
++/* 0 0 0 0  0 0 0 0 */
+diff --git a/arch/arm/boot/dts/imx6ull-kie-inverter-leds.dtsi b/arch/arm/boot/dts/imx6ull-kie-inverter-leds.dtsi
+new file mode 100644
+index 000000000000..db4bce376018
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6ull-kie-inverter-leds.dtsi
+@@ -0,0 +1,38 @@
++/**
++ *	display device tree include-file for Kostal i.MX6ULL based solar-inverter I/O-board
++ *
++ *	@author a.buergel@kostal.com
++ *
++ *	$Id: $
++ *	$HeadURL: $
++ *	$Revision: $
++ */
++
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/leds/common.h>
++
++/{
++	leds {
++		compatible = "gpio-leds";
++
++		led@debug {
++			gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;
++			color = <LED_COLOR_ID_RED>;
++			label = "red:dbg";
++			default-state = "off";
++		};
++
++		led@run {
++			label = "green:run";
++			gpios = <&pca8574 6 GPIO_ACTIVE_HIGH>;
++			default-state = "off";
++		};
++
++		led@error {
++			label = "red:error";
++			gpios = <&pca8574 7 GPIO_ACTIVE_HIGH>;
++			default-state = "off";
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/imx6ull-kie-inverter.dts b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+new file mode 100644
+index 000000000000..72b114e76a3a
+--- /dev/null
++++ b/arch/arm/boot/dts/imx6ull-kie-inverter.dts
+@@ -0,0 +1,347 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2019 DENX Software Engineering GmbH
++ * Author: Parthiban Nallathambi <pn@denx.de>
++ */
++/dts-v1/;
++
++#include "imx6ull.dtsi"
++#include "imx6ull-kie-inverter-display.dtsi"
++#include "imx6ull-kie-inverter-leds.dtsi"
++
++/ {
++	model = "Kostal KIE imx6 Ultra Lite Inverter";
++	compatible = "kostal,imx6ull-inverter", "fsl,imx6ull";
++
++	aliases {
++		u-boot,dm-pre-reloc;
++		mmc0 = &usdhc2;
++		usb0 = &usbotg1;
++		ethernet0 = &fec2;
++	};
++
++	backlight: backlight {
++		compatible = "pwm-backlight";
++		pinctrl-names = "default";
++		pwms = <&pwm6 0 30000>;
++		brightness-levels = <0 5 13 23 31 48 66 94 148 255>;
++		default-brightness-level = <8>;
++		status = "okay";
++	};
++
++	chosen {
++		stdout-path = &uart1;
++	};
++
++	memory {
++		reg = <0x80000000 0x20000000>;
++	};
++
++	regulators: regulators {
++		compatible = "simple-bus";
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		reg_usbotg2_vbus: usbotg2-vbus@0 {
++			compatible = "regulator-fixed";
++			pinctrl-names = "default";
++			pinctrl-0 = <&pinctrl_usb_otg2_vbus>;
++			regulator-name = "usb_otg2_vbus";
++			regulator-min-microvolt = <5000000>;
++			regulator-max-microvolt = <5000000>;
++			gpio = <&gpio1 4 GPIO_ACTIVE_HIGH>;
++			enable-active-high;
++		};
++
++		VDD_in: regulator@1 {
++			compatible = "regulator-fixed";
++			regulator-name = "VDD_in";
++			regulator-min-microvolt = <12000000>;
++			regulator-max-microvolt = <12000000>;
++			regulator-always-on;
++			regulator-boot-on;
++		};
++
++		vcc_5v: regulator@2 {
++			compatible = "regulator-fixed";
++			regulator-name = "+5V";
++			regulator-min-microvolt = <5000000>;
++			regulator-max-microvolt = <5000000>;
++			regulator-always-on;
++			vin-supply = <&VDD_in>;
++		};
++
++		reg_3v3: regulator@4 {
++			compatible = "regulator-fixed";
++			regulator-name = "3V3";
++			regulator-min-microvolt = <3300000>;
++			regulator-max-microvolt = <3300000>;
++			regulator-always-on;
++			vin-supply = <&vcc_5v>;
++		};
++
++		reg_1v8: regulator@5 {
++			compatible = "regulator-fixed";
++			regulator-name = "1V8";
++			regulator-min-microvolt = <1800000>;
++			regulator-max-microvolt = <1800000>;
++			regulator-always-on;
++			vin-supply = <&vcc_5v>;
++		};
++
++		reg_1v35: regulator@6 {
++			compatible = "regulator-fixed";
++			regulator-name = "1V35";
++			regulator-min-microvolt = <1350000>;
++			regulator-max-microvolt = <1350000>;
++			regulator-always-on;
++			vin-supply = <&vcc_5v>;
++		};
++
++
++/*
++		vbus_otg1: regulator@3 {
++			compatible = "regulator-fixed";
++			reg = <3>;
++			regulator-name = "vbus_otg1";
++			regulator-min-microvolt = <5000000>;
++			regulator-max-microvolt = <5000000>;
++		};
++*/
++	};
++
++
++/*
++	panel {
++		compatible = "sitronix,st7701";
++		backlight = <&backlight>;
++
++		port {
++			panel_in: endpoint {
++				remote-endpoint = <&display_out>;
++			};
++		};
++	};
++*/
++
++	watchdog: watchdog {
++		compatible = "linux,wdt-gpio";
++		gpios = <&gpio1 5 GPIO_ACTIVE_HIGH>;
++		pinctrl-0 = <&pinctrl_ext_wdog>;
++		hw_algo = "toggle";
++		hw_margin_ms = <1600>;
++		always-running;
++	};
++};
++
++&can1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_flexcan1>;
++	xceiver-supply = <&vcc_5v>;
++	status = "okay";
++};
++
++&pwm6 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_pwm6>;
++	status = "okay";
++};
++
++&fec2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_enet2>;
++	phy-mode = "rmii";
++	phy-reset-gpios = <&gpio3 22 GPIO_ACTIVE_LOW>;
++	phy-reset-duration = <10>;
++	phy-reset-post-delay = <20>;
++	phy-supply = <&reg_3v3>;
++	status = "okay";
++
++	fixed-link {
++		speed = <100>;
++		full-duplex;
++	};
++
++	mdio {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		switch@10 {
++			compatible = "marvell,mv88e6250";
++			reg = <0x10>;
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++
++				port@0 {
++					reg = <0>;
++					label = "lan1";
++				};
++
++				port@1 {
++					reg = <1>;
++					label = "lan2";
++				};
++
++				port@6 {
++					reg = <6>;
++					label = "cpu";
++					phy-mode = "rmii";
++					ethernet = <&fec2>;
++
++					fixed-link {
++						   speed = <100>;
++						   full-duplex;
++					};
++				};
++			};
++		};
++	};
++};
++
++&i2c1 {
++	clock-frequency = <100000>;
++	pinctrl-names = "default", "gpio";
++	pinctrl-0 = <&pinctrl_i2c1>;
++	status = "okay";
++
++	pca8574: gpio@20 {
++		compatible = "nxp,pca8574";
++		reg = <0x20>;
++		gpio-controller;
++		#gpio-cells = <2>;
++		interrupt-parent = <&gpio1>;
++		interrupts = <8 IRQ_TYPE_LEVEL_LOW>;
++	};
++};
++
++
++
++&uart1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart1>;
++	status = "okay";
++};
++
++&uart2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_uart2>;
++	uart-has-rtscts;
++	status = "okay";
++};
++
++&usbotg1 {
++	/* TODO Fixed regulator needed? */
++	disable-over-current;
++	dr_mode = "host";
++	status = "okay";
++};
++
++&usbotg2 {
++	vbus-supply = <&reg_usbotg2_vbus>;
++	disable-over-current;
++	dr_mode = "host";
++	status = "okay";
++};
++
++&usdhc2 {
++	u-boot,dm-spl;
++	u-boot,dm-pre-reloc;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pinctrl_usdhc2>;
++	bus-width = <8>;
++	non-removable;
++	keep-power-in-suspend;
++	status = "okay";
++};
++
++&iomuxc {
++	pinctrl-names = "default";
++
++	pinctrl_enet2: enet2grp {
++		fsl,pins = <
++			MX6UL_PAD_GPIO1_IO06__ENET2_MDIO	0x10010
++			MX6UL_PAD_GPIO1_IO07__ENET2_MDC		0x10010
++			MX6UL_PAD_ENET2_RX_EN__ENET2_RX_EN	0x1b0b0
++			MX6UL_PAD_ENET2_RX_ER__ENET2_RX_ER	0x1b0b0
++			MX6UL_PAD_ENET2_RX_DATA0__ENET2_RDATA00	0x1b0b0
++			MX6UL_PAD_ENET2_RX_DATA1__ENET2_RDATA01	0x1b0b0
++			MX6UL_PAD_ENET2_TX_EN__ENET2_TX_EN	0x1b010
++			MX6UL_PAD_ENET2_TX_DATA0__ENET2_TDATA00	0x1b010
++			MX6UL_PAD_ENET2_TX_DATA1__ENET2_TDATA01	0x1b010
++			MX6UL_PAD_ENET2_TX_CLK__ENET2_REF_CLK2	0x4001b031
++			MX6UL_PAD_LCD_DATA17__GPIO3_IO22        0x80000000
++		>;
++	};
++
++	pinctrl_ext_wdog: extwdoggrp {
++		fsl,pins = <
++			MX6UL_PAD_GPIO1_IO05__GPIO1_IO05	0x1b0b0
++			/* TODO WDT_SEL, no support in kernel for GPIO */
++			MX6UL_PAD_GPIO1_IO03__GPIO1_IO03	0x1b0b0
++		>;
++	};
++
++	pinctrl_flexcan1: flexcan1grp {
++		fsl,pins = <
++			MX6UL_PAD_LCD_DATA08__FLEXCAN1_TX	0x1b020
++			MX6UL_PAD_LCD_DATA09__FLEXCAN1_RX	0x1b020
++			/* TODO STB - silent mode */
++			MX6UL_PAD_LCD_DATA10__GPIO3_IO15	0x1b0b0
++		>;
++	};
++
++	pinctrl_i2c1: i2cgrp {
++		fsl,pins = <
++			MX6UL_PAD_UART4_TX_DATA__I2C1_SCL	0x4001b8b0
++			MX6UL_PAD_UART4_RX_DATA__I2C1_SDA	0x4001b8b0
++			MX6UL_PAD_GPIO1_IO08__GPIO1_IO08	0x0b0b0
++		>;
++	};
++
++
++	pinctrl_pwm6: pwm6grp {
++		fsl,pins = <
++			MX6UL_PAD_LCD_DATA19__PWM6_OUT		0x1b0b1
++		>;
++	};
++
++	pinctrl_uart1: uart1grp {
++		fsl,pins = <
++			MX6UL_PAD_UART1_TX_DATA__UART1_DCE_TX	0x1b0b1
++			MX6UL_PAD_UART1_RX_DATA__UART1_DCE_RX	0x1b0b1
++		>;
++	};
++
++	pinctrl_uart2: uart2grp {
++		fsl,pins = <
++			MX6UL_PAD_UART2_TX_DATA__UART2_DCE_TX	0x1b0b1
++			MX6UL_PAD_UART2_RX_DATA__UART2_DCE_RX	0x1b0b1
++			MX6UL_PAD_UART2_CTS_B__UART2_DCE_CTS	0x1b0b1
++			MX6UL_PAD_UART2_RTS_B__UART2_DCE_RTS	0x1b0b1
++		>;
++	};
++
++	pinctrl_usb_otg2_vbus: usbotg2vbusgrp {
++		fsl,pins = <
++			MX6UL_PAD_GPIO1_IO04__GPIO1_IO04	0x10b0
++		>;
++	};
++
++	pinctrl_usdhc2: usdhc2grp {
++		fsl,pins = <
++			MX6UL_PAD_NAND_WE_B__USDHC2_CMD 	0x170f9
++			MX6UL_PAD_NAND_RE_B__USDHC2_CLK   	0x100f9
++			MX6UL_PAD_NAND_DATA00__USDHC2_DATA0	0x170f9
++			MX6UL_PAD_NAND_DATA01__USDHC2_DATA1	0x170f9
++			MX6UL_PAD_NAND_DATA02__USDHC2_DATA2	0x170f9
++			MX6UL_PAD_NAND_DATA03__USDHC2_DATA3	0x170f9
++			MX6UL_PAD_NAND_DATA04__USDHC2_DATA4	0x170f9
++			MX6UL_PAD_NAND_DATA05__USDHC2_DATA5	0x170f9
++			MX6UL_PAD_NAND_DATA06__USDHC2_DATA6	0x170f9
++			MX6UL_PAD_NAND_DATA07__USDHC2_DATA7	0x170f9
++			MX6UL_PAD_NAND_ALE__USDHC2_RESET_B 	0x170f9
++		>;
++	};
++};
+diff --git a/drivers/staging/fbtft/Kconfig b/drivers/staging/fbtft/Kconfig
+index dad1ddcd7b0c..ea0a6cc67c1a 100644
+--- a/drivers/staging/fbtft/Kconfig
++++ b/drivers/staging/fbtft/Kconfig
+@@ -155,6 +155,12 @@ config FB_TFT_SSD1351
+ 	help
+ 	  Framebuffer support for SSD1351
+ 
++config FB_TFT_ST75256
++        tristate "FB driver for the ST75256 LCD Controller"
++        depends on FB_TFT
++        help
++          Generic Framebuffer support for ST75256
++
+ config FB_TFT_ST7735R
+ 	tristate "FB driver for the ST7735R LCD Controller"
+ 	depends on FB_TFT
+diff --git a/drivers/staging/fbtft/Makefile b/drivers/staging/fbtft/Makefile
+index e87193f7df14..388b95bf92b1 100644
+--- a/drivers/staging/fbtft/Makefile
++++ b/drivers/staging/fbtft/Makefile
+@@ -29,6 +29,7 @@ obj-$(CONFIG_FB_TFT_SSD1306)     += fb_ssd1306.o
+ obj-$(CONFIG_FB_TFT_SSD1305)     += fb_ssd1325.o
+ obj-$(CONFIG_FB_TFT_SSD1331)     += fb_ssd1331.o
+ obj-$(CONFIG_FB_TFT_SSD1351)     += fb_ssd1351.o
++obj-$(CONFIG_FB_TFT_ST75256)     += fb_st75256.o
+ obj-$(CONFIG_FB_TFT_ST7735R)     += fb_st7735r.o
+ obj-$(CONFIG_FB_TFT_ST7789V)     += fb_st7789v.o
+ obj-$(CONFIG_FB_TFT_TINYLCD)     += fb_tinylcd.o
+diff --git a/drivers/staging/fbtft/fb_st75256.c b/drivers/staging/fbtft/fb_st75256.c
+new file mode 100644
+index 000000000000..fd6564c2caf4
+--- /dev/null
++++ b/drivers/staging/fbtft/fb_st75256.c
+@@ -0,0 +1,482 @@
++/*
++ * FB driver for the ST75256 LCD Controller
++ *
++ * Copyright (C) 2013 Noralf Tronnes
++ * Copyright (C) 2016 Achim Kanert
++ * Copyright (C) 2016-2017 Christian Andersen, Guido Hartwig
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
++ */
++
++#include <linux/module.h>
++#include <linux/kernel.h>
++#include <linux/init.h>
++#include <linux/gpio.h>
++#include <linux/delay.h>
++#include <linux/string.h>
++
++#include "fbtft.h"
++
++#define DRVNAME "fb_st75256"
++
++#define DEBUGINTERFACE             0
++
++/*##*/#define CMD_EXTENSION_1         0x30
++/*02*/#define CMD_DISPLAY_OFF         0xAE
++/*02*/#define CMD_DISPLAY_ON          0xAF
++/*03*/#define CMD_DISPLAY_NORMAL      0xA6
++/*03*/#define CMD_DISPLAY_INVERSE     0xA7
++/*04*/#define CMD_ALL_PIXELS_OFF      0x22
++/*04*/#define CMD_ALL_PIXELS_ON       0x23
++/*05*/#define CMD_SET_DISPLAY_CTRL    0xCA
++/*06*/#define CMD_SLEEP_OUT           0x94
++/*06*/#define CMD_SLEEP_IN            0x95
++/*07*/#define CMD_SET_PAGE_ADDR       0x75
++/*08*/#define CMD_SET_COLUMN_ADDR     0x15
++/*09*/#define CMD_SET_DATA_SCAN_DIR   0xBC
++/*10*/#define CMD_WRITE_DDRAM         0x5C
++/*11*/#define CMD_READ_DDRAM          0x5D
++/*12*/#define CMD_PARTIAL_IN          0xA8
++/*13*/#define CMD_PARTIAL_OUT         0xA9
++/*14*/#define CMD_RMW_IN              0xE0
++/*15*/#define CMD_RMW_OUT             0xEE
++/*16*/#define CMD_SCROLL_AREA         0xAA
++/*17*/#define CMD_SET_START_LINE      0xAB
++/*18*/#define CMD_OSC_ON              0xD1
++/*19*/#define CMD_OSC_OFF             0xD2
++/*20*/#define CMD_POWER_CONTROL       0x20
++/*21*/#define CMD_SET_VOP             0x81
++/*22*/#define CMD_VOP_UP              0xD6
++/*22*/#define CMD_VOP_DOWN            0xD7
++/*23*/#define CMD_READ_VOP_L          0x7C
++/*23*/#define CMD_READ_VOP_H          0x7D
++/*24*/#define CMD_NOP                 0x25
++/*27*/#define CMD_FORMAT_LSB_TOP      0x0C
++/*27*/#define CMD_FORMAT_LSB_BOTTOM   0x08
++/*28*/#define CMD_SET_DISPLAY_MODE    0xF0
++/*28*/#define CMD_DISPLAY_MODE_MONO   0x10
++/*28*/#define CMD_DISPLAY_MODE_GRAY   0x11
++/*29*/#define CMD_SET_ICON_OFF        0x76
++/*29*/#define CMD_SET_ICON_ON         0x77
++/*30*/#define CMD_SET_MASTER          0x6E
++/*30*/#define CMD_SET_SLAVE           0x6F
++
++/*##*/#define CMD_EXTENSION_2         0x31
++/*31*/#define CMD_SET_GRAY_LVL        0x20
++/*32*/#define CMD_SET_ANALOG_CIRCUIT  0x32
++/*33*/#define CMD_BOOSTER_LVL         0x51
++/*34*/#define CMD_INTERNAL_DRIVING    0x40
++/*34*/#define CMD_EXTERNAL_DRIVING    0x41
++/*35*/#define CMD_SET_AUTOREAD        0xD7
++/*35*/#define CMD_AUTOREAD_DISABLE    0x9F
++/*35*/#define CMD_AUTOREAD_ENABLE     0x8F
++/*36*/#define CMD_SET_OTP_WRRD        0xE0
++/*36*/#define CMD_OTP_RD_ENABLE       0x00
++/*36*/#define CMD_OTP_WR_ENABLE       0x20
++/*37*/#define CMD_OTP_CTRL            0xE1
++/*38*/#define CMD_OTP_WR              0xE2
++/*39*/#define CMD_OTP_RD              0xE3
++/*40*/#define CMD_OTP_SEL_CTRL        0xE4
++/*41*/#define CMD_OTP_PROG_SETTING_1  0xE5
++/*41*/#define CMD_OTP_PROG_SETTING_2  0x0F
++/*42*/#define CMD_SET_FRAME_RATE      0xF0
++/*43*/#define CMD_TEMP_RANGE          0xF2
++/*44*/#define CMD_TEMP_GRAD_COMP      0xF4
++
++/*##*/#define CMD_EXTENSION_3         0x38
++/*##*/#define CMD_EXTENSION_4         0x39
++
++/* grayscale = 0.30*R + 0.59*G + 0.11*B */
++#define truecolor2grayscale4(buf, pos)   ((u8)(((77 * (u16)buf[pos + 0] + 151 * (u16)buf[pos + 1] + 28 * (u16)buf[pos + 2]) >> 8) >> 6))
++
++static int set_var(struct fbtft_par *par);
++
++static int init_display(struct fbtft_par *par)
++{
++	fbtft_par_dbg(DEBUG_INIT_DISPLAY, par, "Start init display (v1.0.0)\n");
++
++	if (par->pdata->display.bpp != 24 && par->pdata->display.bpp != 1)
++	{
++		pr_err("unsupported bpp setting, fallback to 1: %d\n", par->pdata->display.bpp);
++		par->pdata->display.bpp = 1;
++		par->info->var.bits_per_pixel = 1;
++		par->info->fix.line_length = par->info->var.xres * par->pdata->display.bpp / 8;
++	}
++
++	if (par->pdata->rotate != 0 && par->pdata->rotate != 180)
++	{
++		pr_err("unsupported bpp setting, fallback to 0: %d\n", par->pdata->rotate);
++		par->pdata->rotate = 0;
++		par->info->var.rotate = 0;
++	}
++
++	if (par->gpio.rd)
++    {
++    	gpiod_set_value(par->gpio.rd, 1);
++    }
++
++    mdelay(20);
++
++	// workaround for possible ST75256 startup bug that prevents writing to video-RAM	
++	int i;
++	for ( i = 0; i < 8; i++) {
++		gpiod_set_value(par->gpio.db[i], 0);
++	}
++	mdelay ( 500);
++
++    write_reg(par, CMD_EXTENSION_1);
++    write_reg(par, CMD_SET_MASTER);
++    write_reg(par, CMD_EXTENSION_2);
++    write_reg(par, CMD_SET_AUTOREAD, CMD_AUTOREAD_DISABLE);
++    write_reg(par, CMD_SET_OTP_WRRD, CMD_OTP_RD_ENABLE);
++    mdelay(20);
++    write_reg(par, CMD_OTP_RD);
++    mdelay(30);
++    write_reg(par, CMD_OTP_CTRL);
++    write_reg(par, CMD_EXTENSION_1);
++    write_reg(par, CMD_SLEEP_OUT);
++    write_reg(par, CMD_DISPLAY_OFF);
++    mdelay(80);
++    write_reg(par, CMD_POWER_CONTROL, 0x0B);
++    write_reg(par, CMD_SET_VOP, 0x12, 0x05);
++    write_reg(par, CMD_EXTENSION_2);
++    write_reg(par, CMD_SET_ANALOG_CIRCUIT, 0x00, 0x01, 0x02);
++    write_reg(par, CMD_EXTENSION_1);
++	if (par->pdata->display.bpp == 24)
++	{
++		par->info->var.bits_per_pixel = 24;
++		par->info->fix.visual = FB_VISUAL_TRUECOLOR;
++
++		write_reg(par, CMD_SET_DISPLAY_MODE, CMD_DISPLAY_MODE_GRAY);
++	    write_reg(par, CMD_DISPLAY_INVERSE);
++	}
++	else
++	{
++		par->info->var.bits_per_pixel = 1;
++		par->info->fix.visual = FB_VISUAL_MONO01;
++
++		write_reg(par, CMD_SET_DISPLAY_MODE, CMD_DISPLAY_MODE_MONO);
++	}
++    write_reg(par, CMD_SET_DISPLAY_CTRL, 0x00, 0xA1, 0x00);
++    write_reg(par, CMD_SET_DATA_SCAN_DIR, 0x00);
++    write_reg(par, CMD_EXTENSION_2);
++    write_reg(par, CMD_INTERNAL_DRIVING);
++    write_reg(par, CMD_EXTENSION_1);
++    write_reg(par, CMD_SET_PAGE_ADDR, 0x00, 0x28);
++    write_reg(par, CMD_SET_COLUMN_ADDR, 0x00, 0xFF);
++    write_reg(par, CMD_EXTENSION_2);
++	if (par->pdata->display.bpp == 24)
++	{
++	    write_reg(par, CMD_SET_GRAY_LVL, 0x00, 0x00, 0x00, 0x11, 0x11, 0x11, 0x00, 0x00, 0x17, 0x00, 0x00, 0x17, 0x17, 0x17, 0x00, 0x00);
++	}
++    write_reg(par, CMD_SET_FRAME_RATE, 0x0E, 0x0E, 0x0E, 0x0E);
++    write_reg(par, CMD_EXTENSION_1);
++    write_reg(par, CMD_FORMAT_LSB_TOP);
++    write_reg(par, CMD_DISPLAY_ON);
++
++    set_var(par);
++
++    memset((u8 *)par->info->screen_base, 0xff, par->info->fix.smem_len);
++
++	return 0;
++}
++
++static int set_var(struct fbtft_par *par)
++{
++	par->info->fix.line_length = par->info->var.xres * par->pdata->display.bpp / 8;
++
++	if (par->info->var.bits_per_pixel != par->pdata->display.bpp)
++	{
++		par->info->var.bits_per_pixel = par->pdata->display.bpp;
++		printk(KERN_INFO "FBTFT ST75256 change of bpp after init is not allowed!");
++	}
++
++	if (par->info->var.rotate != par->pdata->rotate)
++	{
++		par->info->var.rotate = par->pdata->rotate;
++		printk(KERN_INFO "FBTFT ST75256 change of rotate after init is not allowed!");
++	}
++
++	/* y-offset handling */
++	if (par->pdata->display.bpp == 24)
++	{
++		par->info->var.grayscale = 0;
++		par->info->var.red.offset = 0;
++		par->info->var.red.length = 8;
++		par->info->var.green.offset = 8;
++		par->info->var.green.length = 8;
++		par->info->var.blue.offset = 16;
++		par->info->var.blue.length = 8;
++		par->info->var.transp.offset = 0;
++		par->info->var.transp.length = 0;
++		switch (par->info->var.rotate)
++		{
++		case 0:
++		case 180:
++			par->info->var.xoffset = 0;
++			par->info->var.yoffset = 2;
++			par->info->var.yres = par->pdata->display.height + 2;
++			break;
++		default:
++			break;
++		}
++	}
++	else
++	{
++		par->info->var.grayscale = 1;
++		par->info->var.red.offset = 0;
++		par->info->var.red.length = 1;
++		par->info->var.green.offset = 0;
++		par->info->var.green.length = 1;
++		par->info->var.blue.offset = 0;
++		par->info->var.blue.length = 1;
++		par->info->var.transp.offset = 0;
++		par->info->var.transp.length = 0;
++		switch (par->info->var.rotate)
++		{
++		case 0:
++			par->info->var.xoffset = 0;
++			par->info->var.yoffset = 2;
++			par->info->var.yres = par->pdata->display.height + 2;
++			break;
++		case 180:
++			par->info->var.xoffset = 0;
++			par->info->var.yoffset = 6;
++			par->info->var.yres = par->pdata->display.height + 6;
++			break;
++		default:
++			break;
++		}
++	}
++	
++	switch (par->info->var.rotate)
++	{
++	case 0:
++		write_reg(par, CMD_EXTENSION_1);
++		write_reg(par, CMD_SET_DATA_SCAN_DIR, 0x00);
++		write_reg(par, CMD_FORMAT_LSB_TOP);
++		printk(KERN_INFO "FBTFT ST75256 set rotation to 0°");
++		break;
++	case 180:
++		write_reg(par, CMD_EXTENSION_1);
++		write_reg(par, CMD_SET_DATA_SCAN_DIR, 0x03);
++		write_reg(par, CMD_FORMAT_LSB_BOTTOM);
++		printk(KERN_INFO "FBTFT ST75256 set rotation to 180°");
++		break;
++	default:
++		pr_err("unsupported rotate setting: %d\n", par->info->var.rotate);
++		break;
++	}
++
++	return 0;
++}
++
++static void set_addr_win(struct fbtft_par *par, int xs, int ys, int xe, int ye)
++{
++    int _xs, _ys, _xe, _ye;
++
++    _ys = 0x00;
++    if (par->pdata->display.bpp == 24)
++    {
++        _ye = 0x28;
++    }
++    else
++    {
++        _ye = 0x14;
++    }
++
++    //Display rotation   0° -> Column address 0 ... 239
++    //Display rotation 180° -> Column address 16 ... 255
++    switch (par->info->var.rotate)
++    {
++	default:
++	case 0:
++		_xs = 0;
++		_xe = 239;
++		break;
++	case 180:
++		_xs = 16;
++		_xe = 255;
++		break;
++    }
++    
++    write_reg(par, CMD_EXTENSION_1);
++    write_reg(par, CMD_SET_PAGE_ADDR, _ys, _ye);
++    write_reg(par, CMD_SET_COLUMN_ADDR, _xs, _xe);
++}
++
++static int blank(struct fbtft_par *par, bool on)
++{
++	if (on)
++	{
++		write_reg(par, CMD_DISPLAY_OFF);
++	}
++	else
++	{
++		write_reg(par, CMD_DISPLAY_ON);
++	}
++	return 0;
++}
++
++static int write_vmem(struct fbtft_par *par, size_t offset, size_t len)
++{
++	u8 *vmem8 = (u8 *)par->info->screen_base;
++	u8 gb = 0xff; //byte to calculate grayscale
++	u8 tb = 0xff; //byte for transpose
++	int x, y, linelen;
++
++#if (DEBUGINTERFACE == 1)
++	long para;
++	char tmpBuf[5];
++	//Interface definition
++	//Byte      Description
++	//[0..2]    CMD Pattern to activate debuginterface
++	//[3]       null
++	//[4..6]    command
++	//[7]       null
++	//[8...n]   parameter
++	if (vmem8[0] == 'C' && vmem8[1] == 'M' && vmem8[2] == 'D')
++	{
++		vmem8[0] = 0;
++		vmem8[1] = 0;
++		vmem8[2] = 0;
++		vmem8[3] = 0;
++		vmem8[7] = 0;
++
++		/*### VOP ###*/
++		if (strcmp(&vmem8[4], "vop") == 0)
++		{
++			write_reg(par, CMD_EXTENSION_1);
++
++			if(vmem8[8] == 'i')
++			{
++				write_reg(par, CMD_VOP_UP);
++				printk(KERN_INFO "VOP increased\n");
++			}
++			else if(vmem8[8] == 'd')
++			{
++				write_reg(par, CMD_VOP_DOWN);
++				printk(KERN_INFO "VOP decreased\n");
++			}
++			else
++			{
++				vmem8[11] = 0;
++				kstrtol(&vmem8[8], 16, &para);
++				tmpBuf[0] = para & 0x3F;
++				tmpBuf[1] = para >> 6 & 0x07;
++				write_reg(par, CMD_SET_VOP, tmpBuf[0], tmpBuf[1]);
++				printk(KERN_INFO "VOP set to 0x%04X(%u)\n", para, para);
++			}
++		}
++
++		/*### Grayscale ###*/
++		if (strcmp(&vmem8[4], "grs") == 0)
++		{
++			write_reg(par, CMD_EXTENSION_2);
++
++			vmem8[10] = 0;
++			kstrtol(&vmem8[8], 16, &para);
++			tmpBuf[0] = para & 0xFF;
++
++			vmem8[13] = 0;
++			kstrtol(&vmem8[11], 16, &para);
++			tmpBuf[1] = para & 0xFF;
++
++			write_reg(par, CMD_SET_GRAY_LVL, 0x00, 0x00, 0x00, tmpBuf[0], tmpBuf[0], tmpBuf[0], 0x00, 0x00, tmpBuf[1], 0x00, 0x00, tmpBuf[1], tmpBuf[1], tmpBuf[1], 0x00, 0x00);
++			printk(KERN_INFO "Grayscale set to 0x%02X(Light) and 0x%02X(Dark)\n", tmpBuf[0], tmpBuf[1]);
++		}
++	}
++#endif
++
++	write_reg(par, CMD_WRITE_DDRAM);
++	if (par->gpio.dc)
++	{
++		gpiod_set_value(par->gpio.dc, 1);
++	}
++
++	//calculate some values for later usage
++	linelen = par->info->var.xres * par->pdata->display.bpp / 8;
++
++	if (par->pdata->display.bpp == 1)
++	{
++		for (y = 0; y < par->info->var.yres; y+=8)
++		{
++			for (x = 0; x < par->info->var.xres; x++)
++			{
++				tb = 0;
++				tb |= ((vmem8[(y+0)*linelen + x/8] >> ((x%8))) & 0x1) << 0;
++				tb |= ((vmem8[(y+1)*linelen + x/8] >> ((x%8))) & 0x1) << 1;
++				tb |= ((vmem8[(y+2)*linelen + x/8] >> ((x%8))) & 0x1) << 2;
++				tb |= ((vmem8[(y+3)*linelen + x/8] >> ((x%8))) & 0x1) << 3;
++				tb |= ((vmem8[(y+4)*linelen + x/8] >> ((x%8))) & 0x1) << 4;
++				tb |= ((vmem8[(y+5)*linelen + x/8] >> ((x%8))) & 0x1) << 5;
++				tb |= ((vmem8[(y+6)*linelen + x/8] >> ((x%8))) & 0x1) << 6;
++				tb |= ((vmem8[(y+7)*linelen + x/8] >> ((x%8))) & 0x1) << 7;
++				par->fbtftops.write(par, &tb, 1);
++			}
++		}
++	}
++	else if (par->pdata->display.bpp == 24)
++	{
++		for (y = 0; y < par->info->var.yres; y+=4)
++		{
++			for (x = 0; x < par->info->var.xres; x++) {
++				tb = 0;
++				gb = truecolor2grayscale4(vmem8, (y+0)*linelen + x*3);
++				tb |= ((gb & 0x1) << 1 | ((gb & 0x02) >> 1)) << 0;
++				gb = truecolor2grayscale4(vmem8, (y+1)*linelen + x*3);
++				tb |= ((gb & 0x1) << 1 | ((gb & 0x02) >> 1)) << 2;
++				gb = truecolor2grayscale4(vmem8, (y+2)*linelen + x*3);
++				tb |= ((gb & 0x1) << 1 | ((gb & 0x02) >> 1)) << 4;
++				gb = truecolor2grayscale4(vmem8, (y+3)*linelen + x*3);
++				tb |= ((gb & 0x1) << 1 | ((gb & 0x02) >> 1)) << 6;
++				par->fbtftops.write(par, &tb, 1);
++			}
++		}
++	}
++	else
++	{
++	    pr_err( "unsupported bpp setting: %d\n", par->pdata->display.bpp);
++	    return 0;
++	}
++
++	if (par->gpio.dc)
++	{
++		gpiod_set_value(par->gpio.dc, 0);
++	}
++
++	return len;
++}
++
++static struct fbtft_display display = {
++	.regwidth = 8,
++	.buswidth = 8,
++	//the fbtft_framebuffer_alloc() use this data to
++	//allocate memory instead of using the data from devicetree.
++	//There for we have to set width/height/bpp to the maximum possible values.
++	.width = 256,
++	.height = 166,
++	.bpp = 24,
++	.fbtftops = {
++		.write_vmem = write_vmem,
++		.set_addr_win = set_addr_win,
++		.init_display = init_display,
++		.blank = blank,
++		.set_var = set_var,
++	},
++};
++
++FBTFT_REGISTER_DRIVER(DRVNAME, "sitronix,st75256", &display);
++
+-- 
+2.37.2
+

@@ -1,0 +1,26 @@
+From af608ba0d7e2274bc0c88f3562a2cb6c3268e68c Mon Sep 17 00:00:00 2001
+From: Lukasz Majewski <lukma@denx.de>
+Date: Wed, 3 Nov 2021 18:36:23 +0100
+Subject: [PATCH] !!! mmc: boot: ro: Set the eMMC boot aread as RO (PERMANENT)
+
+Signed-off-by: Lukasz Majewski <lukma@denx.de>
+---
+ recipes-core/initrdscripts/files/initramfs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/recipes-core/initrdscripts/files/initramfs b/recipes-core/initrdscripts/files/initramfs
+index bc3c2fa..682d12b 100644
+--- a/recipes-core/initrdscripts/files/initramfs
++++ b/recipes-core/initrdscripts/files/initramfs
+@@ -112,7 +112,7 @@ set_ro_on_mmcboot() {
+      echo "Setting ${mmcboot} to RO !"
+      # Please use the -p switch to set RO for boot area permanently,
+      # otherwise the RO is only till next boot.
+-     mmc writeprotect boot set /dev/mmcblk${dev} ${bootpart}
++     mmc writeprotect boot set -p /dev/mmcblk${dev} ${bootpart}
+ }
+ 
+ # Board specific quirks:
+-- 
+2.20.1
+
