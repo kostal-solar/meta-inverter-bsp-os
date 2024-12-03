@@ -1,9 +1,9 @@
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-DEPENDS_append = " u-boot-mkimage-native dtc-native "
+DEPENDS:append = " u-boot-mkimage-native dtc-native "
 do_compile[depends] = "virtual/kernel:do_deploy"
 do_prepareitb[depends] = "${PN}:do_unpack"
 
@@ -29,7 +29,7 @@ IMAGE_INSTALL += " \
 		mmc-utils \
 		"
 
-IMAGE_INSTALL_remove = "mtd-utils mtd-utils-ubifs"
+IMAGE_INSTALL:remove = "mtd-utils mtd-utils-ubifs"
 
 # Ensure the above tarball gets fetched, unpackaged and patched
 python () {
@@ -41,7 +41,7 @@ SRC_URI = " \
 	file://recovery.its.in \
 	"
 
-IMAGE_FSTYPES_append = " ext4.xz"
+IMAGE_FSTYPES:append = " ext4.xz"
 
 inherit fitimage-hab-sign
 
@@ -87,4 +87,4 @@ ROOTFS_POSTPROCESS_COMMAND += "fix_inittab_swupdate; "
 # For better readability provide more meaningfull names for SWUpdate
 # rescue initramfs image
 IMAGE_BASENAME = "rescue-initramfs"
-PROVIDES_append = " ${IMAGE_BASENAME}"
+PROVIDES:append = " ${IMAGE_BASENAME}"

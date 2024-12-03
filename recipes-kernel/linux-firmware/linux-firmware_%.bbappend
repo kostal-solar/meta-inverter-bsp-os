@@ -10,14 +10,14 @@
 #
 
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI += "file://sd8801_uapsta.bin"
 
 #
 #	appended to the do_install() function in the linux-firmware package
 #
-do_install_append() {
+do_install:append() {
     install -d ${D}${base_libdir}/firmware/mrvl
     install -m 0755 ${WORKDIR}/sd8801_uapsta.bin ${D}${base_libdir}/firmware/mrvl/sd8801_uapsta.bin
 }

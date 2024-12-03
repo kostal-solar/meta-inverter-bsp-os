@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_append := "${THISDIR}/linux-5.4:"
+FILESEXTRAPATHS:append := "${THISDIR}/linux-5.4:"
 
 inherit fitimage-hab-sign
 
@@ -42,6 +42,6 @@ SRC_URI += "file://defconfig \
 	    file://imx6ull_defconfig_performance_fix.cfg \
 	"
 
-SRC_URI_remove = "file://0012-symmetric_keys-Fix-key-buffer-usage.patch"
+SRC_URI:remove = "file://0012-symmetric_keys-Fix-key-buffer-usage.patch"
 
 KERNEL_MODULE_AUTOLOAD = "mwifiex imx-sdma"

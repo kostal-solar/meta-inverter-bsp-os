@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI += " \
     file://10-br0.network \
@@ -6,13 +6,13 @@ SRC_URI += " \
     file://br0.netdev \
 "
 
-FILES_${PN} += " \
+FILES:${PN} += " \
     ${sysconfdir}/systemd/network/10-br0.network \
     ${sysconfdir}/systemd/network/20-lan-br0.network \
     ${sysconfdir}/systemd/network/br0.netdev \
 "
 
-do_install_append() {
+do_install:append() {
  install -d ${D}${sysconfdir}/systemd/network
  install -m 0644 ${WORKDIR}/10-br0.network ${D}${sysconfdir}/systemd/network
  install -m 0644 ${WORKDIR}/20-lan-br0.network ${D}${sysconfdir}/systemd/network

@@ -1,4 +1,4 @@
-SRC_URI_append = " \
+SRC_URI:append = " \
   file://0001-arm-dts-Enable-mxs-dcp-by-default.patch \
   file://0002-crypto-mxs-dcp-Implement-reference-keys.patch \
   file://0003-KEYS-add-symmetric-key-type.patch \

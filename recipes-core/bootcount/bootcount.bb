@@ -8,9 +8,9 @@ LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/bootcount_erase;endline=1;md5=daad6f7f7a0a286391cd7773ccf79340 \
 		    file://${WORKDIR}/bootcount_read;endline=1;md5=daad6f7f7a0a286391cd7773ccf79340"
 
-RDEPENDS_${PN} = "busybox"
+RDEPENDS:${PN} = "busybox"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/scripts:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/scripts:"
 SRC_URI += "file://bootcount_erase"
 SRC_URI += "file://bootcount_read"
 SRC_URI += "file://bootcount.service"
@@ -18,7 +18,7 @@ SRC_URI += "file://bootcount.service"
 inherit systemd
 
 SYSTEMD_AUTO_ENABLE = "enable"
-SYSTEMD_SERVICE_${PN} = "bootcount.service"
+SYSTEMD_SERVICE:${PN} = "bootcount.service"
 
 do_install() {
 	install -m 0755 -d ${D}${bindir}
@@ -29,5 +29,5 @@ do_install() {
 	install -m 0644 ${WORKDIR}/bootcount.service ${D}${systemd_unitdir}/system
 }
 
-FILES_${PN} += "${bindir}"
-FILES_${PN} += "${systemd_unitdir}/system/bootcount.service"
+FILES:${PN} += "${bindir}"
+FILES:${PN} += "${systemd_unitdir}/system/bootcount.service"

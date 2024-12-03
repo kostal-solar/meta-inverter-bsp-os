@@ -1,7 +1,7 @@
 #@TYPE: Machine
 #@NAME: Kostal 'inverter' board
 
-include conf/machine/include/tune-cortexa7.inc
+include ../poky-os/meta/conf/machine/include/arm/armv7a/tune-cortexa7.inc
 
 UBOOT_NAME = "u-boot-ivt"
 UBOOT_ENTRYPOINT = "0x87800000"

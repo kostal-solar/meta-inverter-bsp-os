@@ -6,9 +6,9 @@ PR = "r1"
 
 inherit packagegroup
 
-RDEPENDS_${PN} = "\
+RDEPENDS:${PN} = "\
                    util-linux \
-		   libubootenv-bin \
+		               libubootenv-bin \
                    swupdate \
                    swupdate-progress \
                    swupdate-www \

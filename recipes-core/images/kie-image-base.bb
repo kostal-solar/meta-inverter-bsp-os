@@ -27,7 +27,6 @@ IMAGE_INSTALL = "\
 	bridge-utils \
 	net-tools \
 	iproute2 \
-	dhcp-server \
 	libgpiod \
 	libgpiod-tools \
 	wireless-regdb-static \

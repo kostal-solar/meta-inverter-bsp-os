@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 SRC_URI += " \
   file://initramfs \
@@ -6,12 +6,12 @@ SRC_URI += " \
 
 INITFUNCTIONS_INSTALL_DIR ?= "${sysconfdir}/default"
 
-do_install_append () {
+do_install:append () {
 	install -d ${D}${sysconfdir}
 	install -d ${D}${INITFUNCTIONS_INSTALL_DIR}
 	install -m 0755 ${WORKDIR}/initramfs ${D}${INITFUNCTIONS_INSTALL_DIR}
 }
 
-FILES_${PN} += " \
+FILES:${PN} += " \
   ${INITFUNCTIONS_INSTALL_DIR}/initramfs \
 "

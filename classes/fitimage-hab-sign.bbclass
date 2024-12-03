@@ -3,7 +3,7 @@
 # 
 # Licence: same as meta-inverter-bsp
 
-kernel_do_deploy_append() {
+kernel_do_deploy:append() {
     echo "1" >> /tmp/dummy
 	bbwarn "HAB sign not implemented."
 }

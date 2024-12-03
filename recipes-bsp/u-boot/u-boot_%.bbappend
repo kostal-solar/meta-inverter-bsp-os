@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 SRC_URI = "git://git@github.com/kostal-solar/u-boot-imx-os.git;branch=main;protocol=https \
 	   file://fw_env.config \

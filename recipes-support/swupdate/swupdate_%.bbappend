@@ -1,6 +1,6 @@
-FILESEXTRAPATHS_append := "${THISDIR}/files:"
+FILESEXTRAPATHS:append := "${THISDIR}/files:"
 
-PR_append = ".1"
+PR:append = ".1"
 
 DEPENDS += "librsync"
 RDEPENDE_${PN} += "librsync"
@@ -10,12 +10,12 @@ SRC_URI += "file://defconfig \
 	    file://09-swupdate-args \
 	    file://swupdate.cfg"
 
-do_install_prepend() {
+do_install:prepend() {
 	PKEY=$(basename ${SWUPDATE_PUBLIC_KEY})
 	sed -ie "s#__PUBL_KEY#${sysconfdir}/crts/${PKEY}#g" ${WORKDIR}/swupdate.cfg
 }
 
-do_install_append() {
+do_install:append() {
 
 	install -d ${D}${sysconfdir}
         install -d ${D}${sysconfdir}/crts/
@@ -36,4 +36,4 @@ do_install_append() {
         fi
 }
 
-FILES_${PN} += "${sysconfdir}/crts/*"
+FILES:${PN} += "${sysconfdir}/crts/*"

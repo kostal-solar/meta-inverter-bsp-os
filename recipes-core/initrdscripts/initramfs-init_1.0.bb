@@ -2,7 +2,7 @@ SUMMARY = "basic initramfs image init script"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/COPYING.MIT;md5=3da9cfbcb788c80a0384361b4de20420"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 SRC_URI += " \
   file://initramfs \
@@ -11,7 +11,7 @@ SRC_URI += " \
 
 PACKAGES = "${PN}"
 
-RDEPENDS_${PN}_append = "busybox util-linux-mount util-linux-findfs \
+RDEPENDS:${PN}:append = "busybox util-linux-mount util-linux-findfs \
 			 util-linux-uuidd"
 			 
 S = "${WORKDIR}"
@@ -32,7 +32,7 @@ do_install() {
 	install -m 0755 ${WORKDIR}/initramfs ${D}${INITFUNCTIONS_INSTALL_DIR}
 }
 
-FILES_${PN} = "/dev ${base_sbindir}/init"
-FILES_${PN} += " \
+FILES:${PN} = "/dev ${base_sbindir}/init"
+FILES:${PN} += " \
   ${INITFUNCTIONS_INSTALL_DIR}/initramfs \
 "

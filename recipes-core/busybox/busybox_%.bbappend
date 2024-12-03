@@ -2,5 +2,5 @@
 # Lukasz Majewski, DENX Software Engineering, lukma@denx.de.
 #
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 SRC_URI += "file://config_extension.cfg"

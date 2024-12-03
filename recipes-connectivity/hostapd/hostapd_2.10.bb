@@ -31,10 +31,10 @@ CONFLICT_DISTRO_FEATURES = "openssl-no-weak-ciphers"
 
 INITSCRIPT_NAME = "hostapd"
 
-SYSTEMD_SERVICE_${PN} = "hostapd.service"
-SYSTEMD_AUTO_ENABLE_${PN} = "disable"
+SYSTEMD_SERVICE:${PN} = "hostapd.service"
+SYSTEMD_AUTO_ENABLE:${PN} = "disable"
 
-do_configure_append() {
+do_configure:append() {
     install -m 0644 ${WORKDIR}/defconfig ${B}/.config
 }
 
@@ -58,7 +58,7 @@ do_install() {
 	install -m 0600 ${WORKDIR}/accesspoint.rules ${D}${sysconfdir}/udev/rules.d/
 }
 
-CONFFILES_${PN} += "${sysconfdir}/hostapd.conf"
+CONFFILES:${PN} += "${sysconfdir}/hostapd.conf"
 
 # Do not start hostapd service by default on boot
-SYSTEMD_AUTO_ENABLE_${PN} = "disable"
+SYSTEMD_AUTO_ENABLE:${PN} = "disable"
